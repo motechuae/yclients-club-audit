@@ -1,32 +1,30 @@
 # YCLIENTS Club Audit
 
-Russian-language online audit questionnaires for a tennis and padel club. The application provides separate shareable forms for management, reception, CRM/membership, finance, and IT/YCLIENTS, plus a password-protected response dashboard and CSV export.
+Russian-language online audit questionnaires for a tennis and padel club. The static application provides separate shareable forms for management, reception, CRM/membership, finance, and IT/YCLIENTS. Responses are stored in Supabase and reviewed/exported from its Table Editor.
 
 ## Stack
 
-- Next.js
-- Supabase PostgreSQL through the server-side REST API
-- Deployable to Vercel or any Node.js host
+- Static HTML, CSS, and JavaScript in `docs/`
+- GitHub Pages
+- Supabase PostgreSQL and Data API
 
 ## Local setup
 
 1. Create a Supabase project.
 2. Run `supabase/schema.sql` in its SQL editor.
-3. Copy `.env.example` to `.env.local` and add the server-only credentials.
-4. Run `npm install` and `npm run dev`.
+3. Put the Supabase project URL and publishable key in `docs/app.js`.
+4. Configure GitHub Pages to publish from the `docs` directory on `main`.
 
-Do not expose `SUPABASE_SERVICE_ROLE_KEY` in browser code or commit `.env.local`.
+The publishable key is intentionally visible and is restricted by Row Level Security. Never put a Supabase secret or service-role key in this repository.
 
 ## Shareable routes
 
-- `/form/management`
-- `/form/reception`
-- `/form/crm`
-- `/form/finance`
-- `/form/technology`
-- `/admin` for collected responses and CSV export
+- `?form=management`
+- `?form=reception`
+- `?form=crm`
+- `?form=finance`
+- `?form=technology`
 
 ## Deployment
 
-Create the same three environment variables on the hosting provider, deploy, test one submission, and confirm it appears on `/admin` before sharing links.
-
+Enable GitHub Pages for `main` / `docs`, test one submission, and confirm it appears in Supabase Table Editor before sharing links.
