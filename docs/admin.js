@@ -68,15 +68,40 @@ const QUESTION_LABELS = {
 };
 
 const loginView = document.querySelector("#login-view");
+const passwordView = document.querySelector("#password-view");
 const dashboardView = document.querySelector("#dashboard-view");
 const loginForm = document.querySelector("#login-form");
+const passwordForm = document.querySelector("#password-form");
 const loginError = document.querySelector("#login-error");
+const passwordError = document.querySelector("#password-error");
 const results = document.querySelector("#results");
 const status = document.querySelector("#status");
 const filterForm = document.querySelector("#filter-form");
 const filterSearch = document.querySelector("#filter-search");
 let session = JSON.parse(sessionStorage.getItem("auditAdminSession") || "null");
 let rows = [];
+
+function sessionFromHash() {
+  const params = new URLSearchParams(location.hash.slice(1));
+  const error = params.get("error_description");
+  if (error) {
+    loginError.textContent = error.replaceAll("+", " ").includes("expired")
+      ? "Ссылка недействительна или истекла. Запросите новое приглашение."
+      : error.replaceAll("+", " ");
+    history.replaceState(null, "", location.pathname + location.search);
+    return null;
+  }
+  const accessToken = params.get("access_token");
+  if (!accessToken) return null;
+  const hashSession = {
+    access_token: accessToken,
+    refresh_token: params.get("refresh_token"),
+    expires_in: Number(params.get("expires_in") || 0),
+    token_type: params.get("token_type") || "bearer"
+  };
+  history.replaceState(null, "", location.pathname + location.search);
+  return hashSession;
+}
 
 const esc = value => String(value ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[c]));
 const displayAnswer = value => Array.isArray(value) ? value.join(", ") : String(value ?? "").trim();
@@ -170,6 +195,7 @@ function exportCsv() {
 
 function showDashboard() {
   loginView.hidden = true;
+  passwordView.hidden = true;
   dashboardView.hidden = false;
   document.querySelector("#session-email").textContent = session.user?.email || "Авторизованный пользователь";
   fetchRows().catch(error => { status.textContent = error.message; });
@@ -180,6 +206,7 @@ function signOut() {
   rows = [];
   sessionStorage.removeItem("auditAdminSession");
   dashboardView.hidden = true;
+  passwordView.hidden = true;
   loginView.hidden = false;
   loginForm.reset();
 }
@@ -201,11 +228,52 @@ loginForm.addEventListener("submit", async event => {
   }
 });
 
+passwordForm.addEventListener("submit", async event => {
+  event.preventDefault();
+  const button = passwordForm.querySelector("button");
+  const data = new FormData(passwordForm);
+  const password = String(data.get("password") || "");
+  passwordError.textContent = "";
+  if (password !== data.get("password_confirm")) {
+    passwordError.textContent = "Пароли не совпадают.";
+    return;
+  }
+  button.disabled = true;
+  try {
+    const response = await fetch(`${SUPABASE_URL}/auth/v1/user`, {
+      method: "PUT",
+      headers: {
+        apikey: SUPABASE_PUBLISHABLE_KEY,
+        Authorization: `Bearer ${session.access_token}`,
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({password})
+    });
+    const user = await response.json().catch(() => ({}));
+    if (!response.ok) throw new Error(user.msg || user.message || "Не удалось сохранить пароль.");
+    session.user = user;
+    sessionStorage.setItem("auditAdminSession", JSON.stringify(session));
+    passwordForm.reset();
+    showDashboard();
+  } catch (error) {
+    passwordError.textContent = error.message;
+  } finally {
+    button.disabled = false;
+  }
+});
+
 filterForm.addEventListener("change", render);
 filterSearch.addEventListener("input", render);
 document.querySelector("#refresh").addEventListener("click", () => fetchRows().catch(error => { status.textContent = error.message; }));
 document.querySelector("#export").addEventListener("click", exportCsv);
 document.querySelector("#logout").addEventListener("click", signOut);
 
-if (session?.access_token) showDashboard();
+const invitedSession = sessionFromHash();
+if (invitedSession) {
+  session = invitedSession;
+  loginView.hidden = true;
+  passwordView.hidden = false;
+} else if (session?.access_token) {
+  showDashboard();
+}
 

@@ -26,6 +26,18 @@
       </form>
     </section>
 
+    <section id="password-view" class="login-card" hidden>
+      <span class="eyebrow">ПЕРВЫЙ ВХОД</span>
+      <h1>Задайте пароль</h1>
+      <p>Придумайте пароль для доступа к результатам аудита.</p>
+      <form id="password-form">
+        <label>Новый пароль<input type="password" name="password" autocomplete="new-password" minlength="8" required></label>
+        <label>Повторите пароль<input type="password" name="password_confirm" autocomplete="new-password" minlength="8" required></label>
+        <button type="submit">Сохранить пароль</button>
+        <p id="password-error" class="error" role="alert"></p>
+      </form>
+    </section>
+
     <section id="dashboard-view" class="dashboard" hidden>
       <div class="dashboard-title">
         <div><span class="eyebrow">РЕЗУЛЬТАТЫ АУДИТА</span><h1>Ответы сотрудников</h1></div>
@@ -49,7 +61,7 @@
     </section>
   </main>
 
-  <script src="admin.js?v=2" defer></script>
+  <script src="admin.js?v=3" defer></script>
 </body>
 </html>
 
