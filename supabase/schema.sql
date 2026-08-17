@@ -31,9 +31,40 @@ create policy "public_can_submit_audit_response"
     and length(answers::text) <= 30000
   );
 
--- There are intentionally no public policies. The application API writes and
--- reads with the server-only service role key. Never expose that key to browsers.
+create table if not exists public.audit_admins (
+  user_id uuid primary key references auth.users(id) on delete cascade,
+  created_at timestamptz not null default now()
+);
+
+alter table public.audit_admins enable row level security;
+
+grant select on table public.audit_admins to authenticated;
+grant select on table public.audit_responses to authenticated;
+
+drop policy if exists "admin_can_read_own_access" on public.audit_admins;
+create policy "admin_can_read_own_access"
+  on public.audit_admins
+  for select
+  to authenticated
+  using (user_id = auth.uid());
+
+drop policy if exists "audit_admin_can_read_responses" on public.audit_responses;
+create policy "audit_admin_can_read_responses"
+  on public.audit_responses
+  for select
+  to authenticated
+  using (
+    exists (
+      select 1
+      from public.audit_admins
+      where audit_admins.user_id = auth.uid()
+    )
+  );
+
+-- Public visitors can insert validated responses but cannot read them.
+-- Only authenticated users explicitly listed in audit_admins can read results.
 create index if not exists audit_responses_form_id_idx
   on public.audit_responses (form_id);
 create index if not exists audit_responses_submitted_at_idx
   on public.audit_responses (submitted_at desc);
+
