@@ -1,0 +1,70 @@
+input[type=password] {
+  display: block;
+  width: 100%;
+  border: 1px solid #aebfc9;
+  border-radius: 10px;
+  padding: 13px 14px;
+  margin-top: 8px;
+  font: inherit;
+  color: var(--ink);
+  background: #fff;
+}
+
+input[type=password]:focus {
+  border-color: var(--focus);
+  box-shadow: 0 0 0 3px #0b86b81a;
+  outline: 0;
+}
+
+.access-page {
+  min-height: calc(100vh - 154px);
+  display: grid;
+  place-items: center;
+  padding: 48px 0;
+}
+
+.access-card {
+  width: min(460px, 100%);
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  padding: 36px;
+  box-shadow: 0 18px 55px #17324d18;
+}
+
+.access-card h1 {
+  font-size: clamp(31px, 5vw, 42px);
+  margin-bottom: 12px;
+}
+
+.access-card > p {
+  color: var(--muted);
+  margin: 0 0 25px;
+}
+
+.access-card label {
+  display: block;
+  font-weight: 700;
+  color: #314653;
+}
+
+.access-card input {
+  font-size: 22px;
+  letter-spacing: .35em;
+  text-align: center;
+}
+
+.access-card button {
+  width: 100%;
+  margin-top: 16px;
+}
+
+.access-card .error {
+  min-height: 24px;
+  margin: 12px 0 0;
+}
+
+@media (max-width: 650px) {
+  .access-card { padding: 27px 22px; }
+  .access-page { padding: 30px 0; }
+}
