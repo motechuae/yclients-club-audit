@@ -46,6 +46,7 @@ function showAccessGate(){
     }
     sessionStorage.setItem(ACCESS_SESSION_KEY,"yes");
     start();
+    requestAnimationFrame(()=>window.scrollTo({top:0,left:0,behavior:"auto"}));
   });
 }
 
